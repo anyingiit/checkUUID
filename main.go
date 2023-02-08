@@ -3,15 +3,27 @@ package main
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"time"
 )
 
-const checkCount = 200000000
+const checkCount = 2000000
 
 func main() {
+	w := createWorker(func(nowPosition int) {
+		const expectCount = 4
+		const expectPercent int = 100 / expectCount
+
+		curPercent := float64(nowPosition) / float64(checkCount) * 100
+		if curPercent == float64(int(curPercent)) && int(curPercent)%expectPercent == 0 {
+			fmt.Printf("%d%%\n", int(curPercent))
+		}
+	})
+
 	sameUUID := make(map[string]int)
 
 	mp := make(map[string]struct{})
-	for i := 0; i < checkCount; i++ {
+	for i := 1; i <= checkCount; i++ {
+		w <- i
 		curUUID := uuid.New().String()
 
 		if _, ok := mp[curUUID]; ok {
@@ -29,6 +41,9 @@ func main() {
 			mp[curUUID] = struct{}{}
 		}
 	}
+
+	// wait goroutine "status" complete
+	time.Sleep(time.Millisecond)
 
 	if len(sameUUID) == 0 {
 		fmt.Printf("test uuid of %d ok!!!!!\n", checkCount)
