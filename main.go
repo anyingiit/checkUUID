@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-const checkCount = 2000000
+const checkCount = 200000000
 
 func main() {
 	w := createWorker(func(nowPosition int) {
-		const expectCount = 4
+		const expectCount = 10
 		const expectPercent int = 100 / expectCount
 
 		curPercent := float64(nowPosition) / float64(checkCount) * 100
